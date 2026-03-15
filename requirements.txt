@@ -1,0 +1,6 @@
+django
+djangorestframework
+transformers
+sentencepiece
+datasets
+evaluate
