@@ -1,0 +1,42 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+myenvmt/
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Django
+code_translator/db.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# Model checkpoints and large files
+saved_models/
+saved_models_baseline/
+*.bin
+*.pt
+*.pth
+*.safetensors
+
+# HuggingFace / cache
+.cache/
+huggingface/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env

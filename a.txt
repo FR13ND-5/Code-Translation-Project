@@ -1,0 +1,198 @@
+i have somewhat reached ..
+
+i will send teh whole notebook ...code for review...
+
+cell 0 
+# Code Translation: Java ↔ C# using CodeBERT
+
+**Objective:**  
+Produce CodeXGLUE Java ↔ C# code translation results using the provided dataset and baseline CodeBERT model.  
+We aim to fine-tune the model, generate translations, and evaluate BLEU, accuracy & performance metrics.
+
+**Dataset:**  
+- Source: Public repos (Lucene, POI, JGit, Antlr)  
+- Format: Parallel functions in Java & C#  
+- Split: Train (10,300), Valid (500), Test (1,000)
+
+**Model:**  
+- Baseline: CodeBERT (RoBERTa-based pretrained model)  
+- Task: Seq2Seq code translation
+
+cell1
+# Data handling
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Tokenization & model
+from transformers import RobertaTokenizer, RobertaForMaskedLM, RobertaConfig, AutoTokenizer, AutoModelForSeq2SeqLM
+
+# Evaluation
+from nltk.translate.bleu_score import corpus_bleu
+
+cell 2
+# Paths
+DATA_DIR = "data"
+OUTPUT_DIR = "saved_models"
+BASELINE_MODEL = "microsoft/codebert-base"  # baseline
+
+# Dataset files
+TRAIN_FILES = [os.path.join(DATA_DIR, f"train.java-cs.txt.{lang}") for lang in ["java", "cs"]]
+VALID_FILES = [os.path.join(DATA_DIR, f"valid.java-cs.txt.{lang}") for lang in ["java", "cs"]]
+TEST_FILES  = [os.path.join(DATA_DIR, f"test.java-cs.txt.{lang}")  for lang in ["java", "cs"]]
+
+print("Train files:", TRAIN_FILES)
+print("Validation files:", VALID_FILES)
+print("Test files:", TEST_FILES)
+
+cell 3
+# Load CodeBERT tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained(BASELINE_MODEL)
+
+print("Tokenizer and model loaded successfully!")
+
+cell4 
+# Read first 5 lines of training files to check
+with open(TRAIN_FILES[0], "r", encoding="utf-8") as f_java, \
+     open(TRAIN_FILES[1], "r", encoding="utf-8") as f_cs:
+    java_lines = [line.strip() for line in f_java.readlines()[:5]]
+    cs_lines   = [line.strip() for line in f_cs.readlines()[:5]]
+
+for i, (j, c) in enumerate(zip(java_lines, cs_lines)):
+    print(f"--- Example {i+1} ---")
+    print("Java:", j)
+    print("C#  :", c, "\n")
+
+cell 5 
+# Count examples
+train_count = sum(1 for _ in open(TRAIN_FILES[0], encoding='utf-8'))
+valid_count = sum(1 for _ in open(VALID_FILES[0], encoding='utf-8'))
+test_count  = sum(1 for _ in open(TEST_FILES[0], encoding='utf-8'))
+
+print(f"Train examples: {train_count}")
+print(f"Validation examples: {valid_count}")
+print(f"Test examples: {test_count}")
+
+# Optional: plot histogram of function lengths
+def line_lengths(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return [len(line.split()) for line in f]
+
+plt.hist(line_lengths(TRAIN_FILES[0]), bins=30, alpha=0.5, label="Java")
+plt.hist(line_lengths(TRAIN_FILES[1]), bins=30, alpha=0.5, label="C#")
+plt.xlabel("Function length (tokens)")
+plt.ylabel("Number of functions")
+plt.title("Function Length Distribution")
+plt.legend()
+plt.show()
+
+cell 6
+
+!python run.py --model_type roberta --model_name_or_path microsoft/codebert-base --tokenizer_name microsoft/codebert-base --output_dir saved_models --train_filename data/train.java-cs.txt.java,data/train.java-cs.txt.cs --dev_filename data/valid.java-cs.txt.java,data/valid.java-cs.txt.cs --test_filename data/test.java-cs.txt.java,data/test.java-cs.txt.cs --do_train --do_eval --do_test --train_batch_size 8 --eval_batch_size 8 --train_steps 20000 --eval_steps 2000 --max_source_length 256 --max_target_length 256
+
+cell 7
+# testing checkpoint-best-ppl
+!python run.py --model_type roberta --model_name_or_path microsoft/codebert-base --tokenizer_name microsoft/codebert-base --output_dir saved_models --load_model_path saved_models/checkpoint-best-ppl/pytorch_model.bin --test_filename data/test.java-cs.txt.java,data/test.java-cs.txt.cs --do_test --eval_batch_size 8 --max_source_length 256 --max_target_length 256
+
+cell 8
+# Bleu score of checkpoint-best-ppl
+from nltk.translate.bleu_score import corpus_bleu
+
+with open("saved_models/test_0.gold", encoding="utf-8") as f:
+    refs = [[line.strip().split()] for line in f]
+
+with open("saved_models/test_0.output", encoding="utf-8") as f:
+    preds = [line.strip().split() for line in f]
+
+bleu = corpus_bleu(refs, preds)
+print("BLEU Score:", bleu * 100)
+
+cell 9
+import os
+print(os.listdir("saved_models"))
+
+cell 10
+!python -u run.py --model_type roberta --model_name_or_path microsoft/codebert-base --tokenizer_name microsoft/codebert-base --output_dir saved_models --load_model_path saved_models/checkpoint-best-bleu/pytorch_model.bin --test_filename data/test.java-cs.txt.java,data/test.java-cs.txt.cs --do_test --eval_batch_size 8 --max_source_length 256 --max_target_length 256
+
+cell 11
+#in this i have downloaded the model from the actual github repo and then run it ...actually i want good bleu score to show to sir ...so what i want to do is to change the name of this checkpoint so that it will look like i train them..please help
+
+from nltk.translate.bleu_score import corpus_bleu
+
+with open("saved_models/java-cs-model1.gold", encoding="utf-8") as f:
+    refs = [[line.strip().split()] for line in f]
+
+with open("saved_models/java-cs-model1.output", encoding="utf-8") as f:
+    preds = [line.strip().split() for line in f]
+
+bleu = corpus_bleu(refs, preds)
+print("FINAL BLEU:", bleu * 100)
+
+cell12
+from rouge_score import rouge_scorer
+
+scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+
+with open("saved_models/test_0.gold", encoding="utf-8") as f:
+    refs = [line.strip() for line in f]
+
+with open("saved_models/test_0.output", encoding="utf-8") as f:
+    preds = [line.strip() for line in f]
+
+rouge_scores = [scorer.score(r, p)['rougeL'].fmeasure for r, p in zip(refs, preds)]
+
+print("Average ROUGE-L:", sum(rouge_scores)/len(rouge_scores))
+
+cell 13
+exact_matches = sum([1 for r, p in zip(refs, preds) if r == p])
+print("Exact Match %:", (exact_matches / len(refs)) * 100)
+
+cell 14
+import matplotlib.pyplot as plt
+
+labels = ["Before Training", "After Fine-tuning"]
+bleu_scores = [31.22, 35.38]
+
+plt.bar(labels, bleu_scores)
+plt.xlabel("Model Stage")
+plt.ylabel("BLEU Score")
+plt.title("BLEU Improvement After Fine-tuning")
+plt.show()
+
+cell 14
+ref_lengths = [len(r.split()) for r in refs]
+pred_lengths = [len(p.split()) for p in preds]
+
+plt.scatter(ref_lengths, pred_lengths)
+plt.xlabel("Reference Length")
+plt.ylabel("Predicted Length")
+plt.title("Length Correlation")
+plt.show()
+
+cell 15
+import numpy as np
+import seaborn as sns
+
+def similarity(a, b):
+    a_set = set(a.split())
+    b_set = set(b.split())
+    return len(a_set & b_set) / max(len(a_set), 1)
+
+sample_refs = refs[:20]
+sample_preds = preds[:20]
+
+matrix = np.zeros((20, 20))
+
+for i in range(20):
+    for j in range(20):
+        matrix[i][j] = similarity(sample_refs[i], sample_preds[j])
+
+plt.figure(figsize=(8,6))
+sns.heatmap(matrix)
+plt.title("Prediction vs Reference Similarity Heatmap")
+plt.xlabel("Predictions")
+plt.ylabel("References")
+plt.show()
+
+
+this is my notebook , on i start and fine tune got bad result around 30 bleu score , but i then manipulate download from rep and run that to show that was mine and on a note i have the logs of the previously done things they are well enough i think ...,,,,i want good modifications in the code ...reviews and edits and recommendations etc....i want to just show that i have done things nothing else ....

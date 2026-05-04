@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Translator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .glass {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            border: none;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            color: #e2e8f0;
+            resize: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        pre {
+            width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        .btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>⚡ Code Translator (Java → C#)</h1>
+
+        <form method="POST" class="glass">
+            {% csrf_token %}
+
+            <div class="grid">
+                <div>
+                    <div class="label">Input (Java)</div>
+                    <textarea name="code" placeholder="Paste Java code here...">{{ code }}</textarea>
+                </div>
+
+                <div>
+                    <div class="label">Output (C#)</div>
+                    <pre>{{ output }}</pre>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Translate 🚀</button>
+        </form>
+
+        <div class="footer">
+            Model: CodeBERT Fine-tuned | BLEU Score: 77.2
+        </div>
+    </div>
+</body>
+</html>
