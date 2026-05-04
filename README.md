@@ -192,7 +192,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-##Future Work
+## Future Work
 
 - Larger datasets
 - Better models
