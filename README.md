@@ -169,7 +169,7 @@ CodeTranslationProject/
 
 ---
 
-## ⚡ Installation
+## Installation
 
 ```bash
 git clone THE_REPO
@@ -187,12 +187,12 @@ python -m venv myenv
 pip install -r requirements.txt
 ```
 
-## ▶️ Run
+## Run
 ```bash
 python run.py
 ```
 
-## 🔮 Future Work
+##Future Work
 
 - Larger datasets
 - Better models
@@ -201,7 +201,7 @@ python run.py
 
 ---
 
-## 👤 Author
+## Author
 
 **Sagri Mohammed Umer**
 IIT (BHU), Varanasi
